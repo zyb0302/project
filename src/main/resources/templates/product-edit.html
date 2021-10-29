@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+
+<head>
+    <meta charset="UTF-8">
+    <title>小迈家管理系统</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="stylesheet" href="../css/font.css">
+    <link rel="stylesheet" href="../css/xadmin.css">
+    <link rel="stylesheet" href="../css/cascader.css" media="all">
+    <script type="text/javascript" src="../layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../js/xadmin.js"></script>
+    <!--<script type="text/javascript" src="../js/cascader.js"></script>-->
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <script src="../js/jquery-1.9.1.min.js" charset="utf-8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+<style>
+    .layui-upload-img { width: 90px; height: 90px; margin: 0; }
+    .pic-more { width:100%;  margin: 10px 0px 0px 0px;}
+    .pic-more li { width:90px; float: left; margin-right: 5px;}
+    .pic-more li .layui-input { display: initial; }
+    .pic-more li a { position: absolute; top: 0; display: block; }
+    .pic-more li a i { font-size: 24px; background-color: #008800; }
+    #slide-pc-priview .item_img img{ width: 90px; height: 90px;}
+    #slide-pc-priview li{position: relative;}
+    #slide-pc-priview li .operate{ color: #000; display: none;}
+    #slide-pc-priview li .toleft{ position: absolute;top: 40px; left: 1px; cursor:pointer;}
+    #slide-pc-priview li .toright{ position: absolute;top: 40px; right: 1px;cursor:pointer;}
+    #slide-pc-priview li .close{position: absolute;top: 5px; right: 5px;cursor:pointer;}
+    #slide-pc-priview li:hover .operate{ display: block;}
+</style>
+<style>
+    .img_wrapper {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .dragWrapper {
+        position: relative;
+        width: 300px;
+        height: 200px;
+        box-sizing:border-box;
+        -moz-box-sizing:border-box; /* Firefox */
+        -webkit-box-sizing:border-box; /* Safari */
+    }
+    .dragWrapper img{
+        width: 80px;
+        height: 80px;
+    }
+    .img_wrapper li{
+        float: left;
+        overflow: hidden;
+        border: 2px solid transparent;
+        transition: border-color .2s ease-out;
+        margin: 10px;
+        height: 86px;
+        width: 86px;
+        cursor: pointer;
+        box-sizing:border-box;
+        -moz-box-sizing:border-box; /* Firefox */
+        -webkit-box-sizing:border-box; /* Safari */
+    }
+    .img_wrapper li:hover{
+        border: 2px solid #00b295;
+    }
+    .wrapConatiner{
+        min-height: 110px;
+        width:535px;
+        border: 1px dashed #b8c4ce;
+        padding: 15px;
+    }
+    .dragWrapper em{
+        color: #b8c4ce;
+        display: block;
+        width: 80px;
+        background-color: #FFFFFF;
+        border-bottom: 2px solid #00b295;
+        text-align: center;
+        cursor: pointer;
+        　height: 20px;
+        line-height: 20px;
+        background-color: #fff;
+        box-sizing:border-box;
+        -moz-box-sizing:border-box; /* Firefox */
+        -webkit-box-sizing:border-box; /* Safari */
+    }
+    .btn_wrapper .btn{
+        width: 80px;
+        height: 30px;
+        border-radius: 4px;
+        cursor: pointer;
+        border: 1px solid #98CEFA;
+        background: url(../images/del.png)no-repeat center center;
+        margin-left: 13px;
+    }
+</style>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form" lay-filter="form-data">
+            <input type="hidden" id="id" name="id" class="layui-input">
+            <input type="hidden" id="images" name="images" class="layui-input">
+            <div class="layui-form-item">
+                <label for="itemname" class="layui-form-label">
+                    <span class="x-red">*</span>商品名称</label>
+                <div class="layui-input-inline" style="width: 500px">
+                    <input type="text" id="itemname" name="itemname" required="" lay-verify="required" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+
+            <!--<div class="layui-form-item" id="pics">
+                <div class="layui-form-label"><span class="x-red">*</span>图片</div>
+                <div class="layui-input-block" style="width: 70%;height: 130px">
+                    <div class="layui-upload">
+                        <button type="button" class="layui-btn layui-btn-primary pull-left" id="slide-pc">本地图片</button>
+                        <div class="pic-more">
+                            <ul class="pic-more-upload-list" id="slide-pc-priview">
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>-->
+
+            <div class="layui-form-item" id="pics">
+                <div class="layui-form-label"><span class="x-red">*</span>图片</div>
+                <!--<button type="button" class="layui-btn" id="slide-pc">本地图片</button>-->
+                <button class="layui-btn btn">本地图片</button>
+                <div class="wrapConatiner" style="margin-left: 47px;margin-top: 15px;">
+                    <div class="btn_wrapper">
+                        <!--不使用file的默认样式,隐藏file选择框,使用button的click事件触发选择文件-->
+                        <input type="file" name="files" id="files" multiple style="display: none;"  data-name="files1"/>
+                        <!--<button class="btn">本地图片</button>-->
+                    </div>
+                    <!-- 放置上传后图片的容器 -->
+                    <div class="img_wrapper">
+                        <ul></ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">三级分类</label>
+                <div class="layui-input-inline">
+                    <select id="t1CategoryId" name="t1CategoryId" lay-filter="t1CategoryId" lay-verify="required" lay-search="">
+                        <option value="">请选择一级分类</option>
+                    </select>
+                </div>
+                <div class="layui-input-inline" style="width:145px">
+                    <select id="t2CategoryId" name="t2CategoryId" lay-filter="t2CategoryId" lay-verify="required" lay-search="">
+                        <option value="">请选择二级分类</option>
+                    </select>
+                </div>
+                <div class="layui-input-inline" style="width:145px">
+                    <select id="t3CategoryId"  name="t3CategoryId" lay-filter="t3CategoryId" lay-verify="required" lay-search="">
+                        <option value="">请选择三级分类</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="brand" class="layui-form-label">
+                    <span class="x-red"></span>品牌
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="brand" name="brand" autocomplete="off" class="layui-input">
+                </div>
+                <div id="size1" style="display: none">
+                    <label for="size1" class="layui-form-label">
+                        <span class="x-red"></span>服装大小
+                    </label>
+                    <div class="layui-input-inline">
+                        <select name="size1" >
+                            <option value="" >選択してください</option>
+                            <option value="XXS以下" >XXS以下</option>
+                            <option value="XS(SS)" >XS(SS)</option>
+                            <option value="S" >S</option>
+                            <option value="M" >M</option>
+                            <option value="L" >L</option>
+                            <option value="XL(LL)" >XL(LL)</option>
+                            <option value="2XL(3L)" >2XL(3L)</option>
+                            <option value="3XL(4L)" >3XL(4L)</option>
+                            <option value="4XL(5L)以上" >4XL(5L)以上</option>
+                            <option value="FREE SIZE" >FREE SIZE</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div  id="size2" style="display: none">
+                    <label for="size2" class="layui-form-label">
+                        <span class="x-red"></span>服装大小
+                    </label>
+                    <div class="layui-input-inline">
+                        <select name="size2">
+                            <option value="" >選択してください</option>
+                            <option value="20cm以下">20cm以下</option>
+                            <option value="20.5cm" >20.5cm</option>
+                            <option value="21cm" >21cm</option>
+                            <option value="21.5cm" >21.5cm</option>
+                            <option value="22cm" >22cm</option>
+                            <option value="22.5cm" >22.5cm</option>
+                            <option value="23cm" >23cm</option>
+                            <option value="23.5cm" >23.5cm</option>
+                            <option value="24cm" >24cm</option>
+                            <option value="24.5cm" >24.5cm</option>
+                            <option value="25cm" >25cm</option>
+                            <option value="25.5cm" >25.5cm</option>
+                            <option value="26cm" >26cm</option>
+                            <option value="26.5cm" >26.5cm</option>
+                            <option value="27cm" >27cm</option>
+                            <option value="27.5cm以上" >27.5cm以上</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div  id="size3" style="display: none">
+                    <label for="size3" class="layui-form-label">
+                        <span class="x-red"></span>服装大小
+                    </label>
+                    <div class="layui-input-inline">
+                        <select name="size3" >
+                            <option value="" >選択してください</option>
+                            <option value="23.5cm以下" >23.5cm以下</option>
+                            <option value="24cm" >24cm</option>
+                            <option value="24.5cm" >24.5cm</option>
+                            <option value="25cm" >25cm</option>
+                            <option value="25.5cm">25.5cm</option>
+                            <option value="26cm" >26cm</option>
+                            <option value="26.5cm">26.5cm</option>
+                            <option value="27cm" >27cm</option>
+                            <option value="27.5cm">27.5cm</option>
+                            <option value="28cm" >28cm</option>
+                            <option value="28.5cm">28.5cm</option>
+                            <option value="29cm" >29cm</option>
+                            <option value="29.5cm" >29.5cm</option>
+                            <option value="30cm" >30cm</option>
+                            <option value="30.5cm" >30.5cm</option>
+                            <option value="31cm以上" >31cm以上</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="layui-form-item">
+                <label for="itemstatus" class="layui-form-label">
+                    <span class="x-red">*</span>商品状态
+                </label>
+                <div class="layui-input-inline">
+                    <select name="itemstatus" id="itemstatus">
+                        <option value="">選択してください</option>
+                        <option value="新品、未使用" >新品、未使用</option>
+                        <option value="未使用に近い" >未使用に近い</option>
+                        <option value="目立った傷や汚れなし" >目立った傷や汚れなし</option>
+                        <option value="やや傷や汚れあり" >やや傷や汚れあり</option>
+                        <option value="傷や汚れあり" >傷や汚れあり</option>
+                        <option value="全体的に状態が悪い" >全体的に状態が悪い</option>
+                    </select>
+                </div>
+                <label for="deliverymethod" class="layui-form-label">
+                    <span class="x-red">*</span>发货方式
+                </label>
+                <div class="layui-input-inline">
+                    <select name="deliverymethod" id="deliverymethod">
+                        <option value="" >選択してください</option>
+                        <option value="未定" >未定</option>
+                        <option value="らくらくメルカリ便" >らくらくメルカリ便</option>
+                        <option value="ゆうゆうメルカリ便" >ゆうゆうメルカリ便</option>
+                        <option value="ゆうメール" >ゆうメール</option>
+                        <option value="レターパック" >レターパック</option>
+                        <option value="普通郵便(定形、定形外)" >普通郵便(定形、定形外)</option>
+                        <option value="クロネコヤマト" >クロネコヤマト</option>
+                        <option value="ゆうパック" >ゆうパック</option>
+                        <option value="クリックポスト" >クリックポスト</option>
+                        <option value="ゆうパケット" >ゆうパケット</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="postageby" class="layui-form-label">
+                    <span class="x-red">*</span>运费负担
+                </label>
+                <div class="layui-input-inline">
+                    <select name="postageby" id="postageby">
+                        <option value="" >選択してください</option>
+                        <option value="送料込み(出品者負担)" >送料込み(出品者負担)</option>
+                        <option value="着払い(購入者負担)" >着払い(購入者負担)</option>
+                    </select>
+                </div>
+                <label for="deliveryaddress" class="layui-form-label">
+                    <span class="x-red">*</span>发货地点
+                </label>
+                <div class="layui-input-inline">
+                    <select name="deliveryaddress" id="deliveryaddress">
+                        <option value="" >選択してください</option>
+                        <option value="北海道" >北海道</option>
+                        <option value="青森県" >青森県</option>
+                        <option value="岩手県" >岩手県</option>
+                        <option value="宮城県" >宮城県</option>
+                        <option value="秋田県" >秋田県</option>
+                        <option value="山形県" >山形県</option>
+                        <option value="福島県" >福島県</option>
+                        <option value="茨城県" >茨城県</option>
+                        <option value="栃木県" >栃木県</option>
+                        <option value="群馬県" >群馬県</option>
+                        <option value="埼玉県" >埼玉県</option>
+                        <option value="千葉県" >千葉県</option>
+                        <option value="東京都" >東京都</option>
+                        <option value="神奈川県" >神奈川県</option>
+                        <option value="新潟県" >新潟県</option>
+                        <option value="富山県" >富山県</option>
+                        <option value="石川県" >石川県</option>
+                        <option value="福井県" >福井県</option>
+                        <option value="山梨県" >山梨県</option>
+                        <option value="長野県" >長野県</option>
+                        <option value="岐阜県" >岐阜県</option>
+                        <option value="静岡県" >静岡県</option>
+                        <option value="愛知県" >愛知県</option>
+                        <option value="三重県" >三重県</option>
+                        <option value="滋賀県" >滋賀県</option>
+                        <option value="京都府" >京都府</option>
+                        <option value="大阪府" >大阪府</option>
+                        <option value="兵庫県" >兵庫県</option>
+                        <option value="奈良県" >奈良県</option>
+                        <option value="和歌山県" >和歌山県</option>
+                        <option value="鳥取県" >鳥取県</option>
+                        <option value="島根県" >島根県</option>
+                        <option value="岡山県" >岡山県</option>
+                        <option value="広島県" >広島県</option>
+                        <option value="山口県" >山口県</option>
+                        <option value="徳島県" >徳島県</option>
+                        <option value="香川県" >香川県</option>
+                        <option value="愛媛県" >愛媛県</option>
+                        <option value="高知県" >高知県</option>
+                        <option value="福岡県" >福岡県</option>
+                        <option value="佐賀県" >佐賀県</option>
+                        <option value="長崎県" >長崎県</option>
+                        <option value="熊本県" >熊本県</option>
+                        <option value="大分県" >大分県</option>
+                        <option value="宮崎県" >宮崎県</option>
+                        <option value="鹿児島県" >鹿児島県</option>
+                        <option value="沖縄県" >沖縄県</option>
+                        <option value="未定" >未定</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="deliverydate" class="layui-form-label">
+                    <span class="x-red">*</span>发货日期
+                </label>
+                <div class="layui-input-inline">
+                    <select name="deliverydate" id="deliverydate">
+                        <option value="" >選択してください</option>
+                        <option value="1~2日で発送" >1~2日で発送</option>
+                        <option value="2~3日で発送" >2~3日で発送</option>
+                        <option value="4~7日で発送" >4~7日で発送</option>
+                    </select>
+                </div>
+                <label for="price" class="layui-form-label">
+                    <span class="x-red">*</span>售价
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="price" name="price" lay-verify="number" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="des" class="layui-form-label">
+                    <span class="x-red">*</span>商品详情</label>
+                <div class="layui-input-inline">
+                    <textarea type="text" style="width: 496px;height: 330px" id="des" name="des" required="" lay-verify="required" autocomplete="off"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <button class="layui-btn" lay-filter="update" lay-submit="">保存</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    var form;
+    layui.use(['form', 'layer','jquery','upload'],function() {
+         form = layui.form,
+            layer = layui.layer,
+            upload = layui.upload,
+            $ = layui.jquery;
+
+        var t1CategoryIdText = "";
+        var t2CategoryIdText = "";
+
+        var value1 = "";
+        var value2 = "";
+        //监听一级分类下拉框
+        form.on('select(t1CategoryId)', function(dataObj){
+            //移除城市下拉框所有选项
+            $("#t2CategoryId").empty();
+            var t2CategoryIdHtml = '<option value="">请选择二级分类</option>';
+            $("#t2CategoryId").html(t2CategoryIdHtml);
+            var t3CategoryIdHtml = '<option value="">请选择三级分类</option>';
+            $("#t3CategoryId").html(t3CategoryIdHtml);
+            t1CategoryIdText = $("#t1CategoryId").find("option:selected").text();
+            value1 = $("#t1CategoryId").val();
+            if (value1 == 1 || value1 == 2) {
+                $("#size1").css("display","block");
+                $("#size2").css("display","none");
+                $("#size3").css("display","none");
+            }else {
+                $("#size1").css("display","none");
+            }
+            //异步加载下拉框数据
+            $.post("/queryByParentIdAndLevel",{"parentId":value1,"level":2},function (data) {
+                if (data.code == 1000) {
+                    var $html = "";
+                    if(data.data != null) {
+                        $.each(data.data, function (index, item) {
+                            $html += "<option value='" + item.categoryId + "'>" + item.categoryName + "</option>";
+                        });
+                        $("#t2CategoryId").append($html);
+                        //append后必须从新渲染
+                        form.render('select');
+                    }
+                }else {
+                    layer.msg(data.msg, { icon: 5 });
+                }
+
+            });
+
+        });
+
+        //监听二级分类下拉框
+        form.on('select(t2CategoryId)', function(dataObj){
+            //移除县区下拉框所有选项
+            $("#t3CategoryId").empty();
+            var html = '<option value="">请选择三级分类</option>';
+            $("#t3CategoryId").html(html);
+
+            t2CategoryIdText = $("#t2CategoryId").find("option:selected").text();
+            value2 = $("#t2CategoryId").val();
+            if (value1 == 1 && value2 == 16) {
+                $("#size2").css("display","block");
+                $("#size1").css("display","none");
+                $("#size3").css("display","none");
+            }else {
+                $("#size2").css("display","none");
+            }
+            if (value1 == 2 && value2 == 33) {
+                $("#size3").css("display","block");
+                $("#size1").css("display","none");
+                $("#size2").css("display","none");
+            }else {
+                $("#size3").css("display","none");
+            }
+            //异步加载下拉框数据
+            $.post("/queryByParentIdAndLevel",{"parentId":value2,"level":3},function (data) {
+                if (data.code == 1000) {
+                    var $html = "";
+                    if(data.data != null) {
+                        $.each(data.data, function (index, item) {
+                            $html += "<option value='" + item.categoryId + "'>" + item.categoryName + "</option>";
+                        });
+                        $("#t3CategoryId").append($html);
+                        //append后必须从新渲染
+                        form.render('select');
+                    }
+                }else {
+                    layer.msg(data.msg, { icon: 5 });
+                }
+            });
+
+        });
+        var files = [];
+        upload.render({
+            elem: '#slide-pc',
+            url: '/multifileUpload',
+            size: 500,
+            exts: 'jpg|png|jpeg',
+            multiple: true,
+            before: function(obj) {
+                layer.msg('图片上传中...', {
+                    icon: 16,
+                    shade: 0.01,
+                    time: 0
+                })
+                //预读本地文件示例，不支持ie8
+                obj.preview(function(index, file, result){
+                    files = obj.pushFile();
+                    //$('#demo2').append('<img src="'+ result +'" alt="'+ file.name +'" class="layui-upload-img">')
+                    $('#slide-pc-priview').append('<li class="item_img"><div class="operate"><i class="toleft layui-icon">《</i><i class="toright layui-icon">》</i><i class="close layui-icon"><img style="height: 26px;width: 26px;" src="../images/del.png"></i></div><img src="' + result + '" class="img" ><input type="hidden" name="pc_src[]" value="' + result + '" /></li>');
+                });
+            },
+            done: function(res) {
+                layer.close(layer.msg());//关闭上传提示窗口
+                if(res.status == 0) {
+                    return layer.msg(res.message);
+                }
+                //$('#slide-pc-priview').append('<input type="hidden" name="pc_src[]" value="' + res.filepath + '" />');
+                //$('#slide-pc-priview').append('<li class="item_img"><div class="operate"><i class="toleft layui-icon">《</i><i class="toright layui-icon">》</i><i  class="close layui-icon"><img style="height: 32px;width: 32px;" src="__PUBLIC_ADMIN/del.png"></i></div><img src="__STATIC__/../' + res.filepath + '" class="img" ><input type="hidden" name="pc_src[]" value="' + res.filepath + '" /></li>');
+            }
+        });
+
+        //监听提交
+        form.on('submit(update)',function(data) {
+            var images = [];
+            //遍历
+            $.each(files,function(_key){
+                var value = files[_key];
+                images.push(value.name);
+            });
+            if (images.length > 10) {
+                layer.msg("最多上传10张图片", { icon: 5 });
+                return false;
+            }
+            var formData = data.field;
+            if (images.length == 0) {
+                formData.file = $("#images").val();
+            }else {
+                formData.file = images.toString();
+            }
+
+            xadmin.post("/updateMerItems",JSON.stringify(formData));
+            return false;
+        });
+
+        //点击多图上传的X,删除当前的图片
+        $("body").on("click",".close",function(){
+            $(this).closest("li").remove();
+        });
+        //多图上传点击<>左右移动图片
+        $("body").on("click",".pic-more ul li .toleft",function(){
+            var li_index=$(this).closest("li").index();
+            if(li_index>=1){
+                $(this).closest("li").insertBefore($(this).closest("ul").find("li").eq(Number(li_index)-1));
+            }
+        });
+        $("body").on("click",".pic-more ul li .toright",function(){
+            var li_index=$(this).closest("li").index();
+            $(this).closest("li").insertAfter($(this).closest("ul").find("li").eq(Number(li_index)+1));
+        });
+
+        //初始化表格数据
+        //xadmin.initTableData("/queryMerItemsById?id="+xadmin.getQueryString("id"));
+        init();
+    });
+
+    function init() {
+        $.ajax({
+            type : "POST",
+            dataType: "json",//通过GET方式上传请求
+            contentType : "application/json",//上传内容格式为json结构
+            async: false ,
+            url : "/queryMerItemsById?id="+xadmin.getQueryString("id"),
+            success : function(data) {          //请求成功的回调函数
+                if (data.code == 1000) {
+                    var d = data.data;
+                   /* var images = d.images;
+                    if (images != '') {
+                        var split = images.split(",");
+                        for (var i in split) {
+                            $('#slide-pc-priview').append('<li class="item_img"><div class="operate"><i class="toleft layui-icon">《</i><i class="toright layui-icon">》</i><i class="close layui-icon"><img style="height: 26px;width: 26px;" src="../images/del.png"></i></div><img src="/images/' + split[i] + '" class="img" ></li>');
+                        }
+                    }*/
+                    //清空预览图片
+                    $(".img_wrapper ul").html('');
+                    var picData=data.data.list;
+                    $.each(picData,function(n,value){
+                        $('.img_wrapper ul').append('<li id="'+value.id+'"><div class="dragWrapper">' +
+                            '<input type="hidden" value="'+value.id+'">'+
+                            '<img src="' + value.path + '"/>' +
+                            '<em class="setCover" style="position: absolute;top: -40px;left: 0;">封面</em>' +
+                            '<em class="removeImg" style="position: absolute;top: -40px;">删除</em></div></li>')
+                    })
+
+                    for(var key in d){
+                        var id = "#"+key;
+                        $(id).val(d[key]);
+                    }
+
+                    $.post("/queryByParentIdAndLevel",{"parentId":-1,"level":1},function (data) {
+                        if (data.code == 1000) {
+                            var $html = "";
+                            if(data.data != null) {
+                                $.each(data.data, function (index, item) {
+                                    $html += "<option value='" + item.categoryId + "'>" + item.categoryName + "</option>";
+                                });
+                                $("#t1CategoryId").append($html);
+                                //append后必须从新渲染
+                                var t1CategoryId = d.t1CategoryId;
+                                $("#t1CategoryId").val(t1CategoryId);
+                                form.render('select');
+
+                                $.post("/queryByParentIdAndLevel",{"parentId":t1CategoryId,"level":2},function (data) {
+                                    if (data.code == 1000) {
+                                        var $html = "";
+                                        if(data.data != null) {
+                                            $.each(data.data, function (index, item) {
+                                                $html += "<option value='" + item.categoryId + "'>" + item.categoryName + "</option>";
+                                            });
+                                            $("#t2CategoryId").append($html);
+                                            //append后必须从新渲染
+                                            $("#t2CategoryId").val(d.t2CategoryId);
+                                            form.render('select');
+
+                                            $.post("/queryByParentIdAndLevel",{"parentId":d.t2CategoryId,"level":3},function (data) {
+                                                if (data.code == 1000) {
+                                                    var $html = "";
+                                                    if(data.data != null) {
+                                                        $.each(data.data, function (index, item) {
+                                                            $html += "<option value='" + item.categoryId + "'>" + item.categoryName + "</option>";
+                                                        });
+                                                        $("#t3CategoryId").append($html);
+                                                        //append后必须从新渲染
+                                                        $("#t3CategoryId").val(d.t3CategoryId);
+                                                        form.render('select');
+                                                    }
+                                                }else {
+                                                    layer.msg(data.msg, { icon: 5 });
+                                                }
+                                            });
+                                        }
+                                    }else {
+                                        layer.msg(data.msg, { icon: 5 });
+                                    }
+                                });
+
+                            }
+                        }else {
+                            layer.msg(data.msg, { icon: 5 });
+                        }
+
+                    });
+
+                }else {
+                    layer.msg(data.msg, { icon: 5 });
+                }
+            },
+            error : function(e) {           //请求失败的回调函数
+                console.info(e);
+            }
+        });
+    }
+</script>
+<script>
+    $(document).ready(function() {
+        //选择文件点击事件
+        $(".btn").click(function(e){
+            e.preventDefault();
+            $("#files").trigger("click");
+        });
+        //保存文件数组
+        var imgFiles = [];
+        //记录当前文件数
+        var fileCount = 0;
+        //文件变化事件
+        $("#files").change(function() {
+            var files = $(this)[0].files;
+            var imageType = /^image\//;
+            var namePrefix = $(this).data("name");
+            for(var i = 0;i < files.length;i ++) {
+                var file = files[i];
+                var fileType = file.type;
+                if(!imageType.test(fileType)) {
+                    layui.use('layer', function(){
+                        var layer = layui.layer;
+                        layer.msg('请选择图片类型文件', {icon: 6});
+                    });
+                    return;
+                }
+                var fileName = file.name;
+                //文件的唯一标识
+                fileCount++;
+                var fileId = namePrefix + '_' + fileName + '_' + fileCount;
+                //保存文件到数组
+                imgFiles.push({
+                    id : fileId,
+                    file : file
+                });
+            }
+            //清空file框文件,可以连续选择同一文件
+            $(this).val('');
+            //刷新拖动排序
+            $(".wrapConatiner").sortable('refresh');
+            if($('#lineId').val()==''){
+                layui.use('layer', function(){
+                    var layer = layui.layer;
+                    layer.msg('请填写基本信息！！！', {icon: 6});
+                });
+            }else{
+                if(imgFiles.length < 1) {
+                    layui.use('layer', function(){
+                        var layer = layui.layer;
+                        layer.msg('文件为空', {icon: 6});
+                    });
+                    return;
+                }
+                if(!uploadFinish) {
+                    //文件正在上传
+                    return;
+                }
+                uploadFinish = false;
+                var formData = new FormData();
+                $.each(imgFiles, function(index, value) {
+                    var id = value.id;
+                    //  formData.append(id, value.file);
+                    formData.append("file", value.file);
+                });
+
+                $.ajax({
+                    url: '/multifileUpload1',
+                    data: formData,
+                    type: 'POST',
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    beforeSend:function(){
+                        layer.load();
+                    },
+                    success: function(data){
+                        console.log(data);
+                        //清空文件数组
+                        imgFiles = [];
+                        //清空预览图片
+                        $(".img_wrapper ul").html('');
+                        var picData=data.data;
+                        //  var picObj=JSON.parse(picData);
+                        $.each(picData,function(n,value){
+                            $('.img_wrapper ul').append('<li id="'+value.id+'"><div class="dragWrapper">' +
+                                '<input type="hidden" value="'+value.id+'">'+
+                                '<img src="' + value.path + '"/>' +
+                                '<em class="setCover" style="position: absolute;top: -40px;left: 0;">封面</em>' +
+                                '<em class="removeImg" style="position: absolute;top: -40px;">删除</em></div></li>')
+                        })
+                        layer.closeAll('loading');
+
+                    },
+                    error: function(e) {
+                        layer.closeAll('loading');
+                        layui.use('layer', function(){
+                            var layer = layui.layer;
+                            layer.msg(e.message, {icon: 6});
+                        });
+                    },
+                    complete: function() {
+                        //设置请求完成
+                        uploadFinish = true;
+                    }
+                });
+            }
+        });
+        //图片拖动排序
+        var arr = '';
+        $(".wrapConatiner").sortable({
+            items:'li',
+            delay: 0,
+            cursor: 'removeImg',
+            revert: true,
+            cursor: "move",
+            scroll:true,
+            stop:function (event) {
+                //记录sort后的id顺序数组
+                var arr = $(".wrapConatiner").sortable('toArray');
+                var orderTag=arr.join(',');
+                $.ajax({
+                    type: "POST",
+                    url: "/changeOrder?orderTag="+arr,
+                    dataType: "json",
+                    success: function(data){
+                        console.log(data);
+                    }
+                });
+            }
+        });
+        var uploadFinish = true;
+        /* 鼠标移入显示隐藏 */
+        $('.wrapConatiner').on('mouseover',".img_wrapper li",function(e){
+            $(this).find('em').stop().animate({top:"0px"});
+        });
+        $('.wrapConatiner').on('mouseout',".img_wrapper li",function(e){
+            $(this).find('em').stop().animate({top:"-40px"});
+        });
+    });
+
+    $(function(){
+        /* 删除回显的图片文件 */
+        $('.wrapConatiner').on('click','.removeImg',function(){
+            var _this=$(this);
+            var value = _this.parent('.dragWrapper').children()[0].value;
+            $.ajax({
+                type:"POST",
+                url:"/deleteImage?imageId="+value,
+                async:false,
+                dataType:"json",
+                success:function(data){
+                    _this.parent('.dragWrapper').parent().remove();
+
+                },
+                error:function(data){
+                    layui.use('layer', function(){
+                        var layer = layui.layer;
+                        layer.msg(data.message, {icon: 6});
+                    });
+                }
+            });
+        })
+        /* 设为封面 */
+        $('.wrapConatiner').on('click','.setCover',function(){if(lineId != '' ){
+            $.ajax({type:"POST",
+                url:"",
+                async:false,
+                dataType:"json",
+                data:{},
+                success:function(data){
+                    console.log(data);
+                    layui.use('layer', function(){
+                        var layer = layui.layer;
+                        layer.msg(data.message, {icon: 6});
+                    });
+                },
+                error:function(data){
+                    console.log(data);
+                    layui.use('layer', function(){
+                        var layer = layui.layer;
+                        layer.msg(data.message, {icon: 6});
+                    });
+                }
+            });
+        }else{
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg("参数错误", {icon: 5});
+            });
+        }
+        })
+    })
+</script>
+</body>
+
+</html>
